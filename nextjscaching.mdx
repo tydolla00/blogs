@@ -97,13 +97,13 @@ const SecondTest = async () => {
 };
 ```
 
-Here we have three server components all making requests to retrieve users from the database. However one of them makes request directly to the database. Can you guess what the log will be once this page renders? {Answer} Because the SecondTest component makes a direct call to the database it skips the cache because it is not using the fetch API.
+Here we have three server components all making requests to retrieve users from the database. However one of them makes request directly to the database. Can you guess what the log will be once this page renders? (Answer) Because the SecondTest component makes a direct call to the database it skips the cache because it is not using the fetch API.
 
-That's pretty unfortunate when we think about tools such as tRPC and ORM's that make api routes useless because of server components ability to write database logic directly in the component. Luckily React has a cache function that can help us in this exact scenario! {Show code for next scenario} Now we can wrap our function that calls our DB in the cache function and voila we've achieved the same behavior as the fetch API.
+That's pretty unfortunate when we think about tools such as tRPC and ORM's that make api routes useless because of server components ability to write database logic directly in the component. Luckily React has a cache function that can help us in this exact scenario! (Show code for next scenario) Now we can wrap our function that calls our DB in the cache function and voila we've achieved the same behavior as the fetch API.
 
 > Data Cache
 
-The Data Cache works hand and hand with Request Memoization. A request is made to an endpoint on the first request it misses the cache and data cache. In the response it sets the data cache and memoizes the request. Now on every subsequent call to the same endpoint, the request will hit the cache and data cache returning the data from the data cache. {This could be a problem for invalid data.}
+The Data Cache works hand and hand with Request Memoization. A request is made to an endpoint on the first request it misses the cache and data cache. In the response it sets the data cache and memoizes the request. Now on every subsequent call to the same endpoint, the request will hit the cache and data cache returning the data from the data cache. (This could be a problem for invalid data.)
 
 ![Untitled](Blog%20Posts%20fc8428b682ef43ac82fe1a04a8097837/NextJS%20Caching%20Mechanisms%20cd7419d12c704887a3ba3b4d2959abd9/Untitled%201.png)
 
