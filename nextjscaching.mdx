@@ -4,23 +4,34 @@ date: "2023-10-20"
 tags: ["nextjs", "new", "react", "tech"]
 ---
 
-So if you're new to React & NextJS like I was you're probably overwhelmed with all the incredible features it has to offer. NextJS 13's introduction to the App Router brought a myriad of brand new features including support for React Server Components, the React teams' brand new invention!
+<H1 text="What the heck is caching in React?... using NextJS" />
 
-React Server Components are their own complex jenga game to understand. Josh Comeau, a very experienced React dev wrote an amazing blog post about it. Check it out here. [https://www.joshwcomeau.com/react/server-components/](https://www.joshwcomeau.com/react/server-components/)
+So if you're new to React & NextJS like I was you're probably overwhelmed with all the incredible features it has to offer. Next 13 introduces the App Router, bringing a myriad of brand new features including support for React Server Components, the React teams' brand new invention!
+
+React Server Components are their own complex jenga game to understand. They're out
+of the scope of this blog, however Josh Comeau, a very experienced React dev wrote
+an amazing blog post about it! Check it out here. [https://www.joshwcomeau.com/react/server-components/](https://www.joshwcomeau.com/react/server-components/)
 
 In short, React Server Components are components that run exclusively on the server (…sort of) which means you are able to directly access your backend system, such as databases, file systems, and much more. They allow for you to write asynchronous code and send fully hydrated HTML to the client in the response when a user visits a certain page. Today we're talking about caching though. What is caching, how does it work in react, Next, and much more.
 
-> What is Caching?
+<H1 id="caching" text="What is Caching?" />
 
 In order to explain caching let's see an example of a problem it solves. (graphic of scenario)
 
 <aside>
-💡 You go to the grocery store to purchase groceries. You come back with a lot of groceries and your driveway is far from your door. So you have to make multiple trips back and forth to retrieve all of your groceries.
-Now let's take a different approach. Instead of carrying groceries from the driveway to the door multiple times which will take a long time, what if we dropped all of the groceries off at a midway point between the door and the driveway. Now we bring the groceries from the midway point to the door theoretically saving us a ton of time! This is caching but on a smaller scale. Caching is really fast and is quite inexpensive as opposed to contacting a database every time you need the same thing.
-
+  You go to the grocery store to purchase groceries. You come back with a lot of
+  groceries and your driveway is far from your door. So you have to make
+  multiple trips back and forth to retrieve all of your groceries. Now let's
+  take a different approach. Instead of carrying groceries from the driveway to
+  the door multiple times which will take a long time, what if we dropped all of
+  the groceries off at a midway point between the door and the driveway. Now we
+  bring the groceries from the midway point to the door theoretically saving us
+  a ton of time! This is caching but on a smaller scale. Caching is really fast
+  and is quite inexpensive as opposed to contacting a database every time you
+  need the same thing.
 </aside>
 
-There are four key points of caching in NextJS
+<H2 id="keypoints" text="4 Key Points of Caching in Next" />
 
 - Request Memoization
 - Data Cache
@@ -29,17 +40,17 @@ There are four key points of caching in NextJS
 
 Let's talk about Request Memoization.
 
-> Request Memoization
+<H2 id="request" text="Request Memoization" />
 
 Request Memoization often referred to as deduplication, occurs when making requests to the same endpoint. Using the native fetch api, requests hitting the same endpoint will be cached and served from the cache.
 
 An example use case would be when you want to fetch the same data on two different pages. In a normal scenario you would have to refetch that same data which is not very efficient. Let's see how caching improves this scenario.
 
-![Untitled](Blog%20Posts%20fc8428b682ef43ac82fe1a04a8097837/NextJS%20Caching%20Mechanisms%20cd7419d12c704887a3ba3b4d2959abd9/Untitled.png)
+<CustomImage src="requestmemoization" alt="Request Memoization">
 
 On our first fetch request we get a miss on any cached requests because there are none stored so we go straight to our data source. Every subsequent call to the same endpoint will hit our cache and receive the data without hitting the data store. What does this look like in code?
 
-```tsx
+```jsx
 const getUsers = async () => {
   const res = await fetch("http://localhost:3000/api/test");
   return res.json();
@@ -101,21 +112,19 @@ Here we have three server components all making requests to retrieve users from 
 
 That's pretty unfortunate when we think about tools such as tRPC and ORM's that make api routes useless because of server components ability to write database logic directly in the component. Luckily React has a cache function that can help us in this exact scenario! (Show code for next scenario) Now we can wrap our function that calls our DB in the cache function and voila we've achieved the same behavior as the fetch API.
 
-> Data Cache
+<H2 id="datacache" text="Data Cache" />
 
 The Data Cache works hand and hand with Request Memoization. A request is made to an endpoint on the first request it misses the cache and data cache. In the response it sets the data cache and memoizes the request. Now on every subsequent call to the same endpoint, the request will hit the cache and data cache returning the data from the data cache. (This could be a problem for invalid data.)
 
-![Untitled](Blog%20Posts%20fc8428b682ef43ac82fe1a04a8097837/NextJS%20Caching%20Mechanisms%20cd7419d12c704887a3ba3b4d2959abd9/Untitled%201.png)
-
-![Untitled](Blog%20Posts%20fc8428b682ef43ac82fe1a04a8097837/NextJS%20Caching%20Mechanisms%20cd7419d12c704887a3ba3b4d2959abd9/Untitled%202.png)
-
-![Untitled](Blog%20Posts%20fc8428b682ef43ac82fe1a04a8097837/NextJS%20Caching%20Mechanisms%20cd7419d12c704887a3ba3b4d2959abd9/Untitled%203.png)
+<CustomImage src="datacache" alt="Initial Data Cache Request" />
+<CustomImage src="datacache2" alt="Time Based Revalidation Data Cache" />
+<CustomImage src="datacache3" alt="On-Demand Revalidation Data Cache" />
 
 You can opt out of caching if your data changes frequently. Such as apps like a Flight Tracker, food reservation, etc. Next provides many ways to invalidate data, read about it here.
 
 [Building Your Application: Caching](https://nextjs.org/docs/app/building-your-application/caching#data-cache)
 
-> Full Route Cache & Router Cache
+<H2 id="fullroutecache" text="Full Route Cache & Router Cache" />
 
 Next Docs has amazing info about the full route cache and router cache. Read about them here If you want me to go over these in detail contact me and if I get enough requests I will update the section.
 
