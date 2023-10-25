@@ -46,7 +46,7 @@ Request Memoization often referred to as deduplication, occurs when making reque
 
 An example use case would be when you want to fetch the same data on two different pages. In a normal scenario you would have to refetch that same data which is not very efficient. Let's see how caching improves this scenario.
 
-<CustomImage src="requestmemoization" alt="Request Memoization">
+<CustomImage src="requestmemoization.png" alt="Request Memoization">
 
 On our first fetch request we get a miss on any cached requests because there are none stored so we go straight to our data source. Every subsequent call to the same endpoint will hit our cache and receive the data without hitting the data store. What does this look like in code?
 
@@ -116,9 +116,9 @@ That's pretty unfortunate when we think about tools such as tRPC and ORM's that 
 
 The Data Cache works hand and hand with Request Memoization. A request is made to an endpoint on the first request it misses the cache and data cache. In the response it sets the data cache and memoizes the request. Now on every subsequent call to the same endpoint, the request will hit the cache and data cache returning the data from the data cache. (This could be a problem for invalid data.)
 
-<CustomImage src="datacache" alt="Initial Data Cache Request" />
-<CustomImage src="datacache2" alt="Time Based Revalidation Data Cache" />
-<CustomImage src="datacache3" alt="On-Demand Revalidation Data Cache" />
+<CustomImage src="datacache.png" alt="Initial Data Cache Request" />
+<CustomImage src="datacache2.png" alt="Time Based Revalidation Data Cache" />
+<CustomImage src="datacache3.png" alt="On-Demand Revalidation Data Cache" />
 
 You can opt out of caching if your data changes frequently. Such as apps like a Flight Tracker, food reservation, etc. Next provides many ways to invalidate data, read about it here.
 
