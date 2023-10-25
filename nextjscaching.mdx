@@ -46,7 +46,7 @@ Request Memoization often referred to as deduplication, occurs when making reque
 
 An example use case would be when you want to fetch the same data on two different pages. In a normal scenario you would have to refetch that same data which is not very efficient. Let's see how caching improves this scenario.
 
-<CustomImage src="requestmemoization.png" alt="Request Memoization">
+<CustomImage src="requestmemoization.png" alt="Request Memoization" />
 
 On our first fetch request we get a miss on any cached requests because there are none stored so we go straight to our data source. Every subsequent call to the same endpoint will hit our cache and receive the data without hitting the data store. What does this look like in code?
 
