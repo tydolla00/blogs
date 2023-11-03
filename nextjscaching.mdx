@@ -13,8 +13,7 @@ It brings a myriad of brand new features including support for React Server Comp
 <InfoBlock type="info">
   React Server Components are their own complex jenga game to understand.
   They're out of the scope of this blog, however Josh Comeau, a **very**
-  experienced React dev wrote an amazing blog post about it! Check it out
-  <BlueLink
+  experienced React dev wrote an amazing blog post about it! Check it out <BlueLink
     href="https://www.joshwcomeau.com/react/server-components/"
     text="here"
   />
@@ -83,12 +82,18 @@ What does this look like in code?
 desc="The built in fetch API caches requests automatically, 
 you can opt out of caching at a request level or a route level."
 >
+<Tab title="Fetch API" value="stage1" desc="The built in fetch API caches requests automatically, you can opt out of caching at a request level or a route level.">
 <Code lang="jsx">
 ```jsx
-const getUsers = async () => {
-  const res = await fetch("http://localhost:3000/api/test");
+GET(request: NextRequest){
+  // fetch user from database. 
   console.log("Users fetched.")
-  return res.json();
+  // return user;
+}
+
+const getUsers = async () => {
+const res = await fetch("http://localhost:3000/api/test");
+return res.json();
 };
 
 export default async function TestPage() {
@@ -102,42 +107,125 @@ export default async function TestPage() {
 }
 
 const Test = async () => {
-const users: user[] = await getUsers();
-return (
-
-<>...</>
-); };
+  const users: user[] = await getUsers();
+  return (<>...</>);
+};
 
 const SecondTest = async () => {
-const users: user[] = await getUsers();
-return (
-
-  <>...</>
-); 
+  const users: user[] = await getUsers();
+  return (<>...</>); 
 };
 ```
 </Code>
+
 How many times do you think "Users fetched" will be printed to the console?
+<br/>
+"1"
+<br/>
+Thanks to deduplication our database is only queried once. Every time 
+getUsers is called data will be served from the data store (more about that later.).
+<br/>
+What if we can't always use the fetch API? In some scenarios you may want to fetch data
+on the client, query the db directly via an ORM, or make use of server actions. This
+is where React's <CodeBlock>cache</CodeBlock> function comes in.
+
+<button>Next</button>
+
+
+</Tab>
+
+<Tab title="React Cache function" value="stage2"
+desc="React provides a cache function that allows you to 
+simulate the same behavior when not using the fetch API." 
+>
+```jsx
+// http://localhost:3000/api/test
+GET(request: NextRequest){
+  // fetch user from database.
+
+  console.log("Users fetched.")
+  return user;
+}
+- - - - - - - - - - - - - - - - - - - - - - - 
+
+const getUsers = async () => {
+  // GET request to API and return users;
+
+  const res = await fetch("http://localhost:3000/api/test");
+  return res.json();
+};
+
+const getUsersCached = cache(async () => {
+  // Query DB directly and return users
+
+  const users = await prisma.user.findMany();
+  console.log("Users fetched.");
+  return users;
+});
+
+export default async function TestPage() {
+  const users: user[] = await getUsersCached();
+  return (
+    <>
+      <Test />
+      <SecondTest />
+    </>
+  );
+}
+
+const Test = async () => {
+const users: user[] = await getUsers();
+  return (<>...</>);
+};
+
+const SecondTest = async () => {
+  const users: user[] = await getUsersCached();
+  return (<>...</>); 
+};
+
+```
+How many times do you think Users fetched will be printed in the console?
+
+"2"
+<br/>
+You might think "Users fetched." would be logged only once. However getUsers and
+getUsersCached are two different functions and therefore exist separately
+in memory. Even though they both return users, they're entirely
+different functions and execute once each time they are called.
+<br/>
+These functions are now deduped, meaning if we call getUsers or getUsersCached again,
+we will not query our database. <BlueLink href="https://react.dev/reference/react/cache" text="Read more about React's cache function."/>
+</Tab>
 </Tabs>
 
-Here we have three server components all making requests to retrieve users from the database. However one of them makes request directly to the database. Can you guess what the log will be once this page renders? (Answer) Because the SecondTest component makes a direct call to the database it skips the cache because it is not using the fetch API.
+<InfoBlock type="warning">
+Cache functions behave differently than the fetch API. 
 
-That’s pretty unfortunate when we think about tools such as tRPC and ORM’s that make api routes useless because of server components ability to write database logic directly in the component. Luckily React has a cache function that can help us in this exact scenario! (Show code for next scenario) Now we can wrap our function that calls our DB in the cache function and voila we’ve achieved the same behavior as the fetch API.
+*'React will invalidate the cache for all memoized functions for each server request.'*
+<br/>
+This means that if you refresh the page, you would see "Users fetched." 
+in the log from the getUsersCached function and not from the api route. This is because
+the cache is **not** persisted across requests.
+</InfoBlock>
 
 <H2 id="datacache" text="Data Cache" />
 
-The Data Cache works hand and hand with Request Memoization. A request is made to an endpoint on the first request it misses the cache and data cache. In the response it sets the data cache and memoizes the request. Now on every subsequent call to the same endpoint, the request will hit the cache and data cache returning the data from the data cache. (This could be a problem for invalid data.)
+The Data Cache works hand and hand with Request Memoization. A request is 
+made to an endpoint. On the first initial request it misses the cache. In 
+the response it sets the data cache and memoizes the request. Now on every 
+subsequent call, the request will *hit* and return data from the data cache. (This could be a problem for invalid data.)
+
+You can opt out of caching if your data changes frequently. Such as apps 
+like a Flight Tracker, food reservation, etc.
+<BlueLink href="https://nextjs.org/docs/app/building-your-application/caching#data-cache"
+text="Next provides many ways to invalidate data."/> Take a look at the diagrams 
+below for a brief overview of how invalidating works.
 
 <CustomImage src="datacache.png" alt="Initial Data Cache Request" />
 <CustomImage src="datacache2.png" alt="Time Based Revalidation Data Cache" />
 <CustomImage src="datacache3.png" alt="On-Demand Revalidation Data Cache" />
 
-You can opt out of caching if your data changes frequently. Such as apps like a Flight Tracker, food reservation, etc. Next provides many ways to invalidate data, read about it here.
-
-[Building Your Application: Caching](https://nextjs.org/docs/app/building-your-application/caching#data-cache)
-
 <H2 id="fullroutecache" text="Full Route Cache & Router Cache" />
 
-Next Docs has amazing info about the full route cache and router cache. Read about them here If you want me to go over these in detail contact me and if I get enough requests I will update the section.
-
-[Building Your Application: Caching](https://nextjs.org/docs/app/building-your-application/caching#full-route-cache)
+Next Docs has amazing info about the full route cache and router cache. If you want me to go over these in detail contact me and if I get enough requests I will update the section.
+<BlueLink href="https://nextjs.org/docs/app/building-your-application/caching#full-route-cache" text="Full Route Cache"/>
